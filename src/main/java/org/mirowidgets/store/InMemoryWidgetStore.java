@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 class InMemoryWidgetStore implements WidgetStore {
   private final Map<Integer, Widget> zIndexToWidget = new HashMap<>(1000);
   private final Map<String, Widget> idToWidget = new HashMap<>(1000);
-  private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+  private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
   private final Lock writeLock = readWriteLock.writeLock();
   private final Lock readLock = readWriteLock.readLock();
 
