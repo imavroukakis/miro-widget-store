@@ -100,7 +100,7 @@ public class WidgetTest {
     // then
     List<Widget> widgets = WIDGET_STORE.list();
     assertThat(widgets).size().isEqualTo(12001);
-    assertThat(widgets).extractingResultOf("getZ").containsSequence(12_000, 12_001);
+    assertThat(widgets).extractingResultOf("getZIndex").containsSequence(12_000, 12_001);
     assertThat(widgets.get(8)).isEqualTo(widget);
   }
 
@@ -130,8 +130,8 @@ public class WidgetTest {
     // then
     List<Widget> widgets = WIDGET_STORE.list();
     assertThat(widgets).size().isEqualTo(4);
-    assertThat(widgets).last().extracting("z").containsOnly(4);
-    assertThat(widgets).extracting("z").containsExactly(1, 2, 3, 4);
+    assertThat(widgets).last().extracting("zIndex").containsOnly(4);
+    assertThat(widgets).extracting("zIndex").containsExactly(1, 2, 3, 4);
     assertThat(widgets.get(3)).isEqualTo(widget);
   }
 
@@ -187,6 +187,7 @@ public class WidgetTest {
     Widget updatedWidget = optionalWidget.get();
     assertThat(updatedWidget).isNotEqualTo(widget);
     assertThat(updatedWidget.getCoordinates()).isNotEqualTo(widget.getCoordinates());
+    assertThat(updatedWidget.getLastModified()).isAfter(widget.getLastModified());
     assertThat(updatedWidget.getZIndex()).isEqualTo(widget.getZIndex());
     assertThat(updatedWidget.getDimensions()).isEqualTo(widget.getDimensions());
     assertThat(updatedWidget.getId()).isEqualTo(widget.getId());
@@ -212,8 +213,38 @@ public class WidgetTest {
     assertThat(updatedWidget).isNotEqualTo(widget);
     assertThat(updatedWidget.getCoordinates()).isEqualTo(widget.getCoordinates());
     assertThat(updatedWidget.getZIndex()).isEqualTo(widget.getZIndex());
+    assertThat(updatedWidget.getLastModified()).isAfter(widget.getLastModified());
     assertThat(updatedWidget.getDimensions()).isNotEqualTo(widget.getDimensions());
     assertThat(updatedWidget.getId()).isEqualTo(widget.getId());
+  }
+
+  @Test
+  public void updating_all_widget_data_returns_widget_with_new_data() {
+    // given
+    Widget widget =
+        WIDGET_STORE.create(
+            Coordinates.builder().setX(0).setY(0).build(),
+            Dimensions.builder().setHeight(1).setWidth(1).build(),
+            0);
+
+    // when
+    Optional<Widget> optionalWidget =
+        WIDGET_STORE.update(
+            Dimensions.builder().setHeight(10).setWidth(10).build(),
+            Coordinates.builder().setX(10).setY(10).build(),
+            1,
+            widget.getId());
+
+    // then
+    assertThat(optionalWidget).isPresent();
+    Widget updatedWidget = optionalWidget.get();
+    assertThat(updatedWidget).isNotEqualTo(widget);
+    assertThat(updatedWidget.getCoordinates()).isNotEqualTo(widget.getCoordinates());
+    assertThat(updatedWidget.getZIndex()).isNotEqualTo(widget.getZIndex());
+    assertThat(updatedWidget.getLastModified()).isAfter(widget.getLastModified());
+    assertThat(updatedWidget.getDimensions()).isNotEqualTo(widget.getDimensions());
+    assertThat(updatedWidget.getId()).isEqualTo(widget.getId());
+    assertThat(WIDGET_STORE.list()).size().isEqualTo(1);
   }
 
   @Test
@@ -242,6 +273,7 @@ public class WidgetTest {
     assertThat(updatedWidget).isNotEqualTo(widgetToUpdate);
     assertThat(updatedWidget.getCoordinates()).isEqualTo(widgetToUpdate.getCoordinates());
     assertThat(updatedWidget.getZIndex()).isNotEqualTo(widgetToUpdate.getZIndex()).isEqualTo(10);
+    assertThat(updatedWidget.getLastModified()).isAfter(widgetToUpdate.getLastModified());
     assertThat(updatedWidget.getDimensions()).isEqualTo(widgetToUpdate.getDimensions());
     assertThat(updatedWidget.getId()).isEqualTo(widgetToUpdate.getId());
     Optional<Widget> displacedWidget = WIDGET_STORE.get(id);
@@ -276,6 +308,7 @@ public class WidgetTest {
     assertThat(updatedWidget).isNotEqualTo(newWidget);
     assertThat(updatedWidget.getCoordinates()).isEqualTo(newWidget.getCoordinates());
     assertThat(updatedWidget.getZIndex()).isNotEqualTo(newWidget.getZIndex()).isEqualTo(15);
+    assertThat(updatedWidget.getLastModified()).isAfter(newWidget.getLastModified());
     assertThat(updatedWidget.getDimensions()).isEqualTo(newWidget.getDimensions());
     assertThat(updatedWidget.getId()).isEqualTo(newWidget.getId());
     assertThat(WIDGET_STORE.list()).size().isEqualTo(2);

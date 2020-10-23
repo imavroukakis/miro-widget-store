@@ -16,8 +16,6 @@ public interface WidgetStore {
    */
   List<Widget> list();
 
-  void store(Widget widget);
-
   /**
    * Creates and returns a new {@link Widget}, with all properties set
    *

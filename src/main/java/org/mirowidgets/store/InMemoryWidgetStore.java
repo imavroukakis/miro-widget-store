@@ -4,6 +4,7 @@ import org.mirowidgets.model.Coordinates;
 import org.mirowidgets.model.Dimensions;
 import org.mirowidgets.model.Widget;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -32,17 +33,6 @@ class InMemoryWidgetStore implements WidgetStore {
           .collect(Collectors.toUnmodifiableList());
     } finally {
       readLock.unlock();
-    }
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void store(Widget widget) {
-    try {
-      writeLock.lock();
-      positionWidget(widget);
-    } finally {
-      writeLock.unlock();
     }
   }
 
@@ -116,7 +106,8 @@ class InMemoryWidgetStore implements WidgetStore {
       if (widget.getCoordinates().equals(coordinates)) {
         return optionalWidget;
       }
-      Widget withCoordinates = widget.withCoordinates(coordinates);
+      Widget withCoordinates =
+          widget.withCoordinates(coordinates).withLastModified(LocalDateTime.now());
       try {
         writeLock.lock();
         zIndexToWidget.put(withCoordinates.getZIndex(), withCoordinates);
@@ -139,7 +130,8 @@ class InMemoryWidgetStore implements WidgetStore {
       if (widget.getDimensions().equals(dimensions)) {
         return optionalWidget;
       }
-      Widget withDimensions = widget.withDimensions(dimensions);
+      Widget withDimensions =
+          widget.withDimensions(dimensions).withLastModified(LocalDateTime.now());
       try {
         writeLock.lock();
         zIndexToWidget.put(withDimensions.getZIndex(), withDimensions);
@@ -162,7 +154,7 @@ class InMemoryWidgetStore implements WidgetStore {
       if (widget.getZIndex() == zIndex) {
         return optionalWidget;
       }
-      Widget withNewZ = widget.withZIndex(zIndex);
+      Widget withNewZ = widget.withZIndex(zIndex).withLastModified(LocalDateTime.now());
 
       readLock.lock();
       if (!zIndexToWidget.containsKey(zIndex)) {
