@@ -14,7 +14,7 @@ abstract class WidgetModel {
 
   abstract Coordinates getCoordinates();
 
-  abstract int getZ();
+  abstract int getZIndex();
 
   abstract Dimensions getDimensions();
 

@@ -77,7 +77,7 @@ public class WidgetTest {
     List<Widget> widgets = WIDGET_STORE.list();
 
     // then
-    assertThat(widgets).isSortedAccordingTo(Comparator.comparingInt(Widget::getZ));
+    assertThat(widgets).isSortedAccordingTo(Comparator.comparingInt(Widget::getZIndex));
   }
 
   @Test
@@ -187,7 +187,7 @@ public class WidgetTest {
     Widget updatedWidget = optionalWidget.get();
     assertThat(updatedWidget).isNotEqualTo(widget);
     assertThat(updatedWidget.getCoordinates()).isNotEqualTo(widget.getCoordinates());
-    assertThat(updatedWidget.getZ()).isEqualTo(widget.getZ());
+    assertThat(updatedWidget.getZIndex()).isEqualTo(widget.getZIndex());
     assertThat(updatedWidget.getDimensions()).isEqualTo(widget.getDimensions());
     assertThat(updatedWidget.getId()).isEqualTo(widget.getId());
   }
@@ -211,7 +211,7 @@ public class WidgetTest {
     Widget updatedWidget = optionalWidget.get();
     assertThat(updatedWidget).isNotEqualTo(widget);
     assertThat(updatedWidget.getCoordinates()).isEqualTo(widget.getCoordinates());
-    assertThat(updatedWidget.getZ()).isEqualTo(widget.getZ());
+    assertThat(updatedWidget.getZIndex()).isEqualTo(widget.getZIndex());
     assertThat(updatedWidget.getDimensions()).isNotEqualTo(widget.getDimensions());
     assertThat(updatedWidget.getId()).isEqualTo(widget.getId());
   }
@@ -241,12 +241,12 @@ public class WidgetTest {
     Widget updatedWidget = optionalUpdatedWidget.get();
     assertThat(updatedWidget).isNotEqualTo(widgetToUpdate);
     assertThat(updatedWidget.getCoordinates()).isEqualTo(widgetToUpdate.getCoordinates());
-    assertThat(updatedWidget.getZ()).isNotEqualTo(widgetToUpdate.getZ()).isEqualTo(10);
+    assertThat(updatedWidget.getZIndex()).isNotEqualTo(widgetToUpdate.getZIndex()).isEqualTo(10);
     assertThat(updatedWidget.getDimensions()).isEqualTo(widgetToUpdate.getDimensions());
     assertThat(updatedWidget.getId()).isEqualTo(widgetToUpdate.getId());
     Optional<Widget> displacedWidget = WIDGET_STORE.get(id);
     assertThat(displacedWidget).isPresent();
-    assertThat(displacedWidget.get().getZ()).isEqualTo(11);
+    assertThat(displacedWidget.get().getZIndex()).isEqualTo(11);
     assertThat(WIDGET_STORE.list()).size().isEqualTo(2);
   }
 
@@ -275,7 +275,7 @@ public class WidgetTest {
     Widget updatedWidget = optionalUpdatedWidget.get();
     assertThat(updatedWidget).isNotEqualTo(newWidget);
     assertThat(updatedWidget.getCoordinates()).isEqualTo(newWidget.getCoordinates());
-    assertThat(updatedWidget.getZ()).isNotEqualTo(newWidget.getZ()).isEqualTo(15);
+    assertThat(updatedWidget.getZIndex()).isNotEqualTo(newWidget.getZIndex()).isEqualTo(15);
     assertThat(updatedWidget.getDimensions()).isEqualTo(newWidget.getDimensions());
     assertThat(updatedWidget.getId()).isEqualTo(newWidget.getId());
     assertThat(WIDGET_STORE.list()).size().isEqualTo(2);

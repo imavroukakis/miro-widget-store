@@ -28,7 +28,7 @@ class InMemoryWidgetStore implements WidgetStore {
     try {
       readLock.lock();
       return zIndexToWidget.values().stream()
-          .sorted(Comparator.comparingInt(Widget::getZ))
+          .sorted(Comparator.comparingInt(Widget::getZIndex))
           .collect(Collectors.toUnmodifiableList());
     } finally {
       readLock.unlock();
@@ -51,7 +51,11 @@ class InMemoryWidgetStore implements WidgetStore {
   public Widget create(Coordinates coordinates, Dimensions dimensions, int zIndex) {
 
     Widget widget =
-        Widget.builder().setCoordinates(coordinates).setZ(zIndex).setDimensions(dimensions).build();
+        Widget.builder()
+            .setCoordinates(coordinates)
+            .setZIndex(zIndex)
+            .setDimensions(dimensions)
+            .build();
 
     try {
       writeLock.lock();
@@ -80,7 +84,7 @@ class InMemoryWidgetStore implements WidgetStore {
         Widget.builder()
             .setCoordinates(coordinates)
             .setDimensions(dimensions)
-            .setZ(max + 1)
+            .setZIndex(max + 1)
             .build();
 
     try {
@@ -115,7 +119,7 @@ class InMemoryWidgetStore implements WidgetStore {
       Widget withCoordinates = widget.withCoordinates(coordinates);
       try {
         writeLock.lock();
-        zIndexToWidget.put(withCoordinates.getZ(), withCoordinates);
+        zIndexToWidget.put(withCoordinates.getZIndex(), withCoordinates);
         idToWidget.put(withCoordinates.getId(), withCoordinates);
       } finally {
         writeLock.unlock();
@@ -138,7 +142,7 @@ class InMemoryWidgetStore implements WidgetStore {
       Widget withDimensions = widget.withDimensions(dimensions);
       try {
         writeLock.lock();
-        zIndexToWidget.put(withDimensions.getZ(), withDimensions);
+        zIndexToWidget.put(withDimensions.getZIndex(), withDimensions);
         idToWidget.put(withDimensions.getId(), withDimensions);
       } finally {
         writeLock.unlock();
@@ -155,10 +159,10 @@ class InMemoryWidgetStore implements WidgetStore {
     Optional<Widget> optionalWidget = get(id);
     if (optionalWidget.isPresent()) {
       Widget widget = optionalWidget.get();
-      if (widget.getZ() == zIndex) {
+      if (widget.getZIndex() == zIndex) {
         return optionalWidget;
       }
-      Widget withNewZ = widget.withZ(zIndex);
+      Widget withNewZ = widget.withZIndex(zIndex);
 
       readLock.lock();
       if (!zIndexToWidget.containsKey(zIndex)) {
@@ -168,14 +172,14 @@ class InMemoryWidgetStore implements WidgetStore {
           if (!zIndexToWidget.containsKey(zIndex)) {
             remove(widget);
             idToWidget.put(id, withNewZ);
-            zIndexToWidget.put(withNewZ.getZ(), withNewZ);
+            zIndexToWidget.put(withNewZ.getZIndex(), withNewZ);
           }
         } finally {
           writeLock.unlock(); // unlock
         }
       } else {
         try {
-          readLock.unlock();
+          readLock.unlock(); // unlock the first read lock and promote to write
           writeLock.lock();
           remove(widget);
           positionWidget(withNewZ);
@@ -203,7 +207,7 @@ class InMemoryWidgetStore implements WidgetStore {
   public void remove(Widget widget) {
     try {
       writeLock.lock();
-      zIndexToWidget.remove(widget.getZ());
+      zIndexToWidget.remove(widget.getZIndex());
       idToWidget.remove(widget.getId());
     } finally {
       writeLock.unlock();
@@ -223,7 +227,7 @@ class InMemoryWidgetStore implements WidgetStore {
   }
 
   private void positionWidget(Widget widget) {
-    int zIndex = widget.getZ();
+    int zIndex = widget.getZIndex();
     if (!zIndexToWidget.containsKey(zIndex)) {
       zIndexToWidget.put(zIndex, widget);
       idToWidget.put(widget.getId(), widget);
@@ -231,13 +235,13 @@ class InMemoryWidgetStore implements WidgetStore {
       idToWidget.put(widget.getId(), widget);
       Widget shiftedWidget;
       while ((shiftedWidget = zIndexToWidget.replace(zIndex, widget)) != null) {
-        shiftedWidget = shiftedWidget.withZ(zIndex + 1);
+        shiftedWidget = shiftedWidget.withZIndex(zIndex + 1);
         idToWidget.put(shiftedWidget.getId(), shiftedWidget);
-        zIndex = shiftedWidget.getZ();
+        zIndex = shiftedWidget.getZIndex();
         widget = shiftedWidget;
       }
       idToWidget.put(widget.getId(), widget);
-      zIndexToWidget.put(widget.getZ(), widget);
+      zIndexToWidget.put(widget.getZIndex(), widget);
     }
   }
 }

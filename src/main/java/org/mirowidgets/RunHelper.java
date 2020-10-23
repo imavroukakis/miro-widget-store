@@ -20,7 +20,7 @@ public class RunHelper {
                 Widget.builder()
                     .setCoordinates(Coordinates.builder().setY(0).setX(0).build())
                     .setDimensions(Dimensions.builder().setWidth(1).setHeight(1).build())
-                    .setZ(num)
+                    .setZIndex(num)
                     .build())
         .collect(Collectors.toUnmodifiableList())
         .forEach(widgetStore::store);
