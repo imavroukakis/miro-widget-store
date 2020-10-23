@@ -46,11 +46,10 @@ public class WidgetTest {
   public void new_widget_with_invalid_width_height_throws_exception() {
 
     // given
-    Widget widget =
-        WIDGET_STORE.create(
-            Coordinates.builder().setX(0).setY(0).build(),
-            Dimensions.builder().setHeight(1).setWidth(1).build(),
-            0);
+    WIDGET_STORE.create(
+        Coordinates.builder().setX(0).setY(0).build(),
+        Dimensions.builder().setHeight(1).setWidth(1).build(),
+        0);
 
     // then
     assertThatExceptionOfType(IllegalStateException.class)
@@ -314,13 +313,10 @@ public class WidgetTest {
   @Test
   public void updating_widget_zIndex_to_an_empty_slot_returns_widget_with_this_zIndex() {
     // given
-    String id =
-        WIDGET_STORE
-            .create(
-                Coordinates.builder().setX(0).setY(0).build(),
-                Dimensions.builder().setHeight(1).setWidth(1).build(),
-                10)
-            .getId();
+    WIDGET_STORE.create(
+        Coordinates.builder().setX(0).setY(0).build(),
+        Dimensions.builder().setHeight(1).setWidth(1).build(),
+        10);
 
     Widget newWidget =
         WIDGET_STORE.create(
