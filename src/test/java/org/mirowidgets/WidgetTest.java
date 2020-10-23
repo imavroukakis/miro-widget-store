@@ -43,6 +43,35 @@ public class WidgetTest {
   }
 
   @Test
+  public void new_widget_with_invalid_width_height_throws_exception() {
+
+    // given
+    Widget widget =
+        WIDGET_STORE.create(
+            Coordinates.builder().setX(0).setY(0).build(),
+            Dimensions.builder().setHeight(1).setWidth(1).build(),
+            0);
+
+    // then
+    assertThatExceptionOfType(IllegalStateException.class)
+        .isThrownBy(
+            () ->
+                WIDGET_STORE.create(
+                    Coordinates.builder().setX(0).setY(0).build(),
+                    Dimensions.builder().setHeight(10).setWidth(0).build(),
+                    0))
+        .withMessage("width must be greater than zero");
+    assertThatExceptionOfType(IllegalStateException.class)
+        .isThrownBy(
+            () ->
+                WIDGET_STORE.create(
+                    Coordinates.builder().setX(0).setY(0).build(),
+                    Dimensions.builder().setHeight(0).setWidth(10).build(),
+                    0))
+        .withMessage("height must be greater than zero");
+  }
+
+  @Test
   public void new_widget_has_last_modified_date_automatically_generated() {
 
     // given
