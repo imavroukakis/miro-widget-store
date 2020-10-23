@@ -14,10 +14,7 @@ abstract class WidgetModel {
 
   abstract Coordinates getCoordinates();
 
-  @Value.Default
-  int getZ() {
-    return Integer.MAX_VALUE;
-  }
+  abstract int getZ();
 
   abstract Dimensions getDimensions();
 

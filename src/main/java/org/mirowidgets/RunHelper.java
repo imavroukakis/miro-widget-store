@@ -13,7 +13,7 @@ public class RunHelper {
 
   public static void main(String[] args) {
     final WidgetStore widgetStore = WidgetStores.inMemoryStore();
-    IntStream.range(1, 100_000)
+    IntStream.range(1, 1_000)
         .boxed()
         .map(
             num ->
@@ -28,11 +28,10 @@ public class RunHelper {
     System.out.println("load complete");
 
     for (int i = 0; i < 12000; i++) {
-      Widget widget =
-          widgetStore.create(
-              Coordinates.builder().setY(0).setX(0).build(),
-              Dimensions.builder().setWidth(1).setHeight(1).build(),
-              3);
+      widgetStore.create(
+          Coordinates.builder().setY(0).setX(0).build(),
+          Dimensions.builder().setWidth(1).setHeight(1).build(),
+          3);
     }
   }
 }

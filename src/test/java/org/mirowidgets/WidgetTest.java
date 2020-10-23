@@ -60,7 +60,7 @@ public class WidgetTest {
   public void widget_store_list_returns_smallest_to_largest_by_z_index() {
 
     // given
-    WIDGET_STORE.create( // TODO maybe chain?
+    WIDGET_STORE.create(
         Coordinates.builder().setX(0).setY(0).build(),
         Dimensions.builder().setHeight(1).setWidth(1).build(),
         0);
@@ -108,7 +108,7 @@ public class WidgetTest {
   public void new_widget_without_zIndex_is_assigned_max_zIndex_when_stored() {
 
     // given
-    WIDGET_STORE.create( // TODO maybe chain?
+    WIDGET_STORE.create(
         Coordinates.builder().setX(0).setY(0).build(),
         Dimensions.builder().setHeight(1).setWidth(1).build(),
         1);
@@ -167,5 +167,137 @@ public class WidgetTest {
                 WIDGET_STORE.create(
                     Coordinates.builder().setX(0).setY(0).build(),
                     Dimensions.builder().setHeight(1).setWidth(1).build()));
+  }
+
+  @Test
+  public void updating_widget_coordinates_returns_widget_with_those_coordinates() {
+    // given
+    Widget widget =
+        WIDGET_STORE.create(
+            Coordinates.builder().setX(0).setY(0).build(),
+            Dimensions.builder().setHeight(1).setWidth(1).build(),
+            Integer.MAX_VALUE);
+
+    // when
+    Optional<Widget> optionalWidget =
+        WIDGET_STORE.update(Coordinates.builder().setX(1).setY(1).build(), widget.getId());
+
+    // then
+    assertThat(optionalWidget).isPresent();
+    Widget updatedWidget = optionalWidget.get();
+    assertThat(updatedWidget).isNotEqualTo(widget);
+    assertThat(updatedWidget.getCoordinates()).isNotEqualTo(widget.getCoordinates());
+    assertThat(updatedWidget.getZ()).isEqualTo(widget.getZ());
+    assertThat(updatedWidget.getDimensions()).isEqualTo(widget.getDimensions());
+    assertThat(updatedWidget.getId()).isEqualTo(widget.getId());
+  }
+
+  @Test
+  public void updating_widget_dimensions_returns_widget_with_those_dimensions() {
+    // given
+    Widget widget =
+        WIDGET_STORE.create(
+            Coordinates.builder().setX(0).setY(0).build(),
+            Dimensions.builder().setHeight(1).setWidth(1).build(),
+            Integer.MAX_VALUE);
+
+    // when
+    Optional<Widget> optionalWidget =
+        WIDGET_STORE.update(
+            Dimensions.builder().setHeight(10).setWidth(10).build(), widget.getId());
+
+    // then
+    assertThat(optionalWidget).isPresent();
+    Widget updatedWidget = optionalWidget.get();
+    assertThat(updatedWidget).isNotEqualTo(widget);
+    assertThat(updatedWidget.getCoordinates()).isEqualTo(widget.getCoordinates());
+    assertThat(updatedWidget.getZ()).isEqualTo(widget.getZ());
+    assertThat(updatedWidget.getDimensions()).isNotEqualTo(widget.getDimensions());
+    assertThat(updatedWidget.getId()).isEqualTo(widget.getId());
+  }
+
+  @Test
+  public void updating_widget_zIndex_returns_widget_with_this_zIndex_and_moves_others() {
+    // given
+    String id =
+        WIDGET_STORE
+            .create(
+                Coordinates.builder().setX(0).setY(0).build(),
+                Dimensions.builder().setHeight(1).setWidth(1).build(),
+                10)
+            .getId();
+
+    Widget widgetToUpdate =
+        WIDGET_STORE.create(
+            Coordinates.builder().setX(0).setY(0).build(),
+            Dimensions.builder().setHeight(1).setWidth(1).build(),
+            11);
+
+    // when
+    Optional<Widget> optionalUpdatedWidget = WIDGET_STORE.update(10, widgetToUpdate.getId());
+
+    // then
+    assertThat(optionalUpdatedWidget).isPresent();
+    Widget updatedWidget = optionalUpdatedWidget.get();
+    assertThat(updatedWidget).isNotEqualTo(widgetToUpdate);
+    assertThat(updatedWidget.getCoordinates()).isEqualTo(widgetToUpdate.getCoordinates());
+    assertThat(updatedWidget.getZ()).isNotEqualTo(widgetToUpdate.getZ()).isEqualTo(10);
+    assertThat(updatedWidget.getDimensions()).isEqualTo(widgetToUpdate.getDimensions());
+    assertThat(updatedWidget.getId()).isEqualTo(widgetToUpdate.getId());
+    Optional<Widget> displacedWidget = WIDGET_STORE.get(id);
+    assertThat(displacedWidget).isPresent();
+    assertThat(displacedWidget.get().getZ()).isEqualTo(11);
+    assertThat(WIDGET_STORE.list()).size().isEqualTo(2);
+  }
+
+  @Test
+  public void updating_widget_zIndex_to_an_empty_slot_returns_widget_with_this_zIndex() {
+    // given
+    String id =
+        WIDGET_STORE
+            .create(
+                Coordinates.builder().setX(0).setY(0).build(),
+                Dimensions.builder().setHeight(1).setWidth(1).build(),
+                10)
+            .getId();
+
+    Widget newWidget =
+        WIDGET_STORE.create(
+            Coordinates.builder().setX(0).setY(0).build(),
+            Dimensions.builder().setHeight(1).setWidth(1).build(),
+            11);
+
+    // when
+    Optional<Widget> optionalUpdatedWidget = WIDGET_STORE.update(15, newWidget.getId());
+
+    // then
+    assertThat(optionalUpdatedWidget).isPresent();
+    Widget updatedWidget = optionalUpdatedWidget.get();
+    assertThat(updatedWidget).isNotEqualTo(newWidget);
+    assertThat(updatedWidget.getCoordinates()).isEqualTo(newWidget.getCoordinates());
+    assertThat(updatedWidget.getZ()).isNotEqualTo(newWidget.getZ()).isEqualTo(15);
+    assertThat(updatedWidget.getDimensions()).isEqualTo(newWidget.getDimensions());
+    assertThat(updatedWidget.getId()).isEqualTo(newWidget.getId());
+    assertThat(WIDGET_STORE.list()).size().isEqualTo(2);
+  }
+
+  @Test
+  public void updating_widget_zIndex_to_the_same_zIndex_returns_the_same_widget() {
+    // given
+    Widget widget =
+        WIDGET_STORE.create(
+            Coordinates.builder().setX(0).setY(0).build(),
+            Dimensions.builder().setHeight(1).setWidth(1).build(),
+            10);
+
+    // when
+    Optional<Widget> optionalUpdatedWidget = WIDGET_STORE.update(10, widget.getId());
+
+    // then
+    assertThat(optionalUpdatedWidget).isPresent();
+    Widget updatedWidget = optionalUpdatedWidget.get();
+    assertThat(updatedWidget).isEqualTo(updatedWidget);
+    assertThat(updatedWidget).isSameAs(widget);
+    assertThat(WIDGET_STORE.list()).size().isEqualTo(1);
   }
 }

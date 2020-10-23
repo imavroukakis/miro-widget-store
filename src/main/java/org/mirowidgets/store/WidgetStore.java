@@ -46,6 +46,55 @@ public interface WidgetStore {
    */
   Optional<Widget> get(String id);
 
+  /**
+   * Updates the coordinates of a {@link Widget}. Looks up the widget by id and if found, updates
+   * the coordinates and returns the widget
+   *
+   * @param coordinates the new coordinates
+   * @param id the widget id to update
+   * @return if it exists, the updated widget, otherwise {@link Optional#empty()}
+   */
+  Optional<Widget> update(Coordinates coordinates, String id);
+
+  /**
+   * Updates the dimensions of a {@link Widget}. Looks up the widget by id and if found, updates the
+   * dimensions and returns the widget
+   *
+   * @param dimensions the new dimensions
+   * @param id the widget id to update
+   * @return if it exists, the updated widget, otherwise {@link Optional#empty()}
+   */
+  Optional<Widget> update(Dimensions dimensions, String id);
+
+  /**
+   * Updates the Z-Index of a {@link Widget}. Looks up the widget by id and if found, updates the
+   * Z-Index and returns the widget
+   *
+   * @param zIndex the new Z-Index
+   * @param id the widget id to update
+   * @return if it exists, the updated widget, otherwise {@link Optional#empty()}
+   */
+  Optional<Widget> update(int zIndex, String id);
+
+  /**
+   * Updates the Z-Index,dimensions and coordinates of a {@link Widget}. Looks up the widget by id
+   * and if found, updates the Z-Index,dimensions and coordinates and returns the widget
+   *
+   * @param dimensions the new dimensions
+   * @param coordinates the new coordinates
+   * @param zIndex the new Z-Index
+   * @param id the widget id to update
+   * @return if it exists, the updated widget, otherwise {@link Optional#empty()}
+   */
+  Optional<Widget> update(Dimensions dimensions, Coordinates coordinates, int zIndex, String id);
+
+  /**
+   * Removes a widget
+   *
+   * @param widget the {@link Widget} to remove
+   */
+  void remove(Widget widget);
+
   /** Removes all widgets */
   void clear();
 }

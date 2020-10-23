@@ -31,15 +31,18 @@ public class WidgetStoreBench {
   @Benchmark
   @Warmup(iterations = 5)
   @Measurement(iterations = 10)
-  @Threads(Threads.MAX)
+  @Threads(2)
   public void repositionWidgets(Blackhole blackhole, StateHolder stateHolder) {
 
-    List<Widget> widgets = stateHolder.WIDGET_STORE.list();
     Widget widget =
         stateHolder.WIDGET_STORE.create(
             Coordinates.builder().setY(0).setX(0).build(),
             Dimensions.builder().setWidth(1).setHeight(1).build(),
             3);
+
+    List<Widget> widgets = stateHolder.WIDGET_STORE.list();
+
+    stateHolder.WIDGET_STORE.remove(widget);
 
     blackhole.consume(widgets);
     blackhole.consume(widget);
@@ -59,7 +62,7 @@ public class WidgetStoreBench {
     @Setup
     public void setUp() {
       WIDGET_STORE.clear();
-      for (int i = 0; i < 20_000; i++) {
+      for (int i = 0; i < 1_000; i++) {
         WIDGET_STORE.create(
             Coordinates.builder().setY(0).setX(0).build(),
             Dimensions.builder().setWidth(1).setHeight(1).build(),
