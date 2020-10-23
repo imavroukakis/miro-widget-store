@@ -27,7 +27,7 @@ public class RunHelper {
 
     System.out.println("load complete");
 
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 12000; i++) {
       Widget widget =
           widgetStore.create(
               Coordinates.builder().setY(0).setX(0).build(),

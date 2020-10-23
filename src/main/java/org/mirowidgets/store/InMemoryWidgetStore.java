@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 
 class InMemoryWidgetStore implements WidgetStore {
   private final Map<Integer, Widget> zIndexToWidget = new HashMap<>(1000);
+  private final Map<String, Widget> idToWidget = new HashMap<>(1000);
   private static final ReadWriteLock LOCK = new ReentrantReadWriteLock();
   Lock writeLock = LOCK.writeLock();
   Lock readLock = LOCK.readLock();
@@ -36,7 +38,7 @@ class InMemoryWidgetStore implements WidgetStore {
   public void store(Widget widget) {
     try {
       writeLock.lock();
-      zIndexToWidget.putAll(positionWidget(widget));
+      positionWidget(widget);
     } finally {
       writeLock.unlock();
     }
@@ -50,7 +52,7 @@ class InMemoryWidgetStore implements WidgetStore {
 
     try {
       writeLock.lock();
-      zIndexToWidget.putAll(positionWidget(widget));
+      positionWidget(widget);
     } finally {
       writeLock.unlock();
     }
@@ -79,7 +81,7 @@ class InMemoryWidgetStore implements WidgetStore {
 
     try {
       writeLock.lock();
-      zIndexToWidget.putAll(positionWidget(widget));
+      positionWidget(widget);
     } finally {
       writeLock.unlock();
     }
@@ -87,24 +89,41 @@ class InMemoryWidgetStore implements WidgetStore {
   }
 
   @Override
+  public Optional<Widget> get(String id) {
+    try {
+      readLock.lock();
+      return Optional.ofNullable(idToWidget.get(id));
+    } finally {
+      readLock.unlock();
+    }
+  }
+
+  @Override
   public void clear() {
     try {
       writeLock.lock();
       zIndexToWidget.clear();
+      idToWidget.clear();
     } finally {
       writeLock.unlock();
     }
   }
 
-  private Map<Integer, Widget> positionWidget(Widget widget) {
-    Map<Integer, Widget> widgets = new HashMap<>();
-    widgets.put(widget.getZ(), widget);
+  private void positionWidget(Widget widget) {
     int zIndex = widget.getZ();
-    while (zIndexToWidget.containsKey(zIndex)) {
-      Widget shiftableWidget = zIndexToWidget.get(zIndex).withZ(zIndex + 1);
-      zIndex = shiftableWidget.getZ();
-      widgets.put(zIndex, shiftableWidget);
+    if (!zIndexToWidget.containsKey(zIndex)) {
+      zIndexToWidget.put(zIndex, widget);
+      idToWidget.put(widget.getId(), widget);
+    } else {
+      idToWidget.put(widget.getId(), widget);
+      while (zIndexToWidget.containsKey(zIndex)) {
+        Widget shiftedWidget = zIndexToWidget.replace(zIndex, widget).withZ(zIndex + 1);
+        idToWidget.put(shiftedWidget.getId(), shiftedWidget);
+        zIndex = shiftedWidget.getZ();
+        widget = shiftedWidget;
+      }
+      idToWidget.put(widget.getId(), widget);
+      zIndexToWidget.put(widget.getZ(),widget);
     }
-    return widgets;
   }
 }

@@ -22,8 +22,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @State(Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.SECONDS)
@@ -33,7 +31,7 @@ public class WidgetStoreBench {
   @Benchmark
   @Warmup(iterations = 5)
   @Measurement(iterations = 10)
-  @Threads(2)
+  @Threads(Threads.MAX)
   public void repositionWidgets(Blackhole blackhole, StateHolder stateHolder) {
 
     List<Widget> widgets = stateHolder.WIDGET_STORE.list();
@@ -60,18 +58,13 @@ public class WidgetStoreBench {
 
     @Setup
     public void setUp() {
-      List<Widget> samples =
-          IntStream.range(1, 100_000)
-              .boxed()
-              .map(
-                  num ->
-                      Widget.builder()
-                          .setCoordinates(Coordinates.builder().setY(0).setX(0).build())
-                          .setDimensions(Dimensions.builder().setWidth(1).setHeight(1).build())
-                          .setZ(num)
-                          .build())
-              .collect(Collectors.toUnmodifiableList());
-      samples.forEach(WIDGET_STORE::store);
+      WIDGET_STORE.clear();
+      for (int i = 0; i < 20_000; i++) {
+        WIDGET_STORE.create(
+            Coordinates.builder().setY(0).setX(0).build(),
+            Dimensions.builder().setWidth(1).setHeight(1).build(),
+            i);
+      }
     }
   }
 }

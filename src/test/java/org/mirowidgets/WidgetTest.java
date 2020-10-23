@@ -12,6 +12,7 @@ import org.mirowidgets.store.WidgetStores;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -83,36 +84,24 @@ public class WidgetTest {
   public void new_widget_with_duplicate_zIndex_displaces_others_when_stored() {
 
     // given
-    WIDGET_STORE.create( // TODO maybe chain?
-        Coordinates.builder().setX(0).setY(0).build(),
-        Dimensions.builder().setHeight(1).setWidth(1).build(),
-        1);
-    WIDGET_STORE.create(
-        Coordinates.builder().setX(0).setY(0).build(),
-        Dimensions.builder().setHeight(1).setWidth(1).build(),
-        2);
-    WIDGET_STORE.create(
-        Coordinates.builder().setX(0).setY(0).build(),
-        Dimensions.builder().setHeight(1).setWidth(1).build(),
-        3);
-    WIDGET_STORE.create(
-        Coordinates.builder().setX(0).setY(0).build(),
-        Dimensions.builder().setHeight(1).setWidth(1).build(),
-        10);
-
+    for (int i = 1; i <= 12_000; i++) {
+      WIDGET_STORE.create(
+          Coordinates.builder().setX(0).setY(0).build(),
+          Dimensions.builder().setHeight(1).setWidth(1).build(),
+          i);
+    }
     // when
     Widget widget =
         WIDGET_STORE.create(
             Coordinates.builder().setX(0).setY(0).build(),
             Dimensions.builder().setHeight(1).setWidth(1).build(),
-            2);
+            9);
 
     // then
     List<Widget> widgets = WIDGET_STORE.list();
-    assertThat(widgets).size().isEqualTo(5);
-    assertThat(widgets).last().extracting("z").containsOnly(10);
-    assertThat(widgets).extracting("z").containsExactly(1, 2, 3, 4, 10);
-    assertThat(widgets.get(1)).isEqualTo(widget);
+    assertThat(widgets).size().isEqualTo(12001);
+    assertThat(widgets).extractingResultOf("getZ").containsSequence(12_000, 12_001);
+    assertThat(widgets.get(8)).isEqualTo(widget);
   }
 
   @Test
@@ -144,6 +133,22 @@ public class WidgetTest {
     assertThat(widgets).last().extracting("z").containsOnly(4);
     assertThat(widgets).extracting("z").containsExactly(1, 2, 3, 4);
     assertThat(widgets.get(3)).isEqualTo(widget);
+  }
+
+  @Test
+  public void return_widget_when_looking_up_existing_id() {
+
+    // given
+    Widget widget =
+        WIDGET_STORE.create(
+            Coordinates.builder().setX(0).setY(0).build(),
+            Dimensions.builder().setHeight(1).setWidth(1).build(),
+            999);
+    // when
+    Optional<Widget> optionalWidget = WIDGET_STORE.get(widget.getId());
+
+    // then
+    assertThat(optionalWidget).isPresent().containsSame(widget);
   }
 
   @Test

@@ -5,6 +5,7 @@ import org.mirowidgets.model.Dimensions;
 import org.mirowidgets.model.Widget;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface WidgetStore {
 
@@ -38,7 +39,13 @@ public interface WidgetStore {
   Widget create(Coordinates coordinates, Dimensions dimensions);
 
   /**
-   * Removes all widgets
+   * Attempts to find a widget by its id
+   *
+   * @param id the widget's id
+   * @return an Optional {@link Widget}
    */
+  Optional<Widget> get(String id);
+
+  /** Removes all widgets */
   void clear();
 }
