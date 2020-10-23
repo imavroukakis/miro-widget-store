@@ -59,31 +59,20 @@ class InMemoryWidgetStore implements WidgetStore {
   /** {@inheritDoc} */
   @Override
   public Widget create(Coordinates coordinates, Dimensions dimensions) {
-    OptionalInt maybeMax;
-    try {
-      readLock.lock();
-      maybeMax = zIndexToWidget.keySet().stream().mapToInt(v -> v).max();
-    } finally {
-      readLock.unlock();
-    }
-    int max = maybeMax.orElse(-1);
-    if (max == Integer.MAX_VALUE) {
-      throw new IllegalStateException();
-    }
-    Widget widget =
-        Widget.builder()
-            .setCoordinates(coordinates)
-            .setDimensions(dimensions)
-            .setZIndex(max + 1)
-            .build();
-
     try {
       writeLock.lock();
+      int max = getMaxZIndex();
+      Widget widget =
+          Widget.builder()
+              .setCoordinates(coordinates)
+              .setDimensions(dimensions)
+              .setZIndex(max + 1)
+              .build();
       positionWidget(widget);
+      return widget;
     } finally {
       writeLock.unlock();
     }
-    return widget;
   }
 
   /** {@inheritDoc} */
@@ -235,5 +224,15 @@ class InMemoryWidgetStore implements WidgetStore {
       idToWidget.put(widget.getId(), widget);
       zIndexToWidget.put(widget.getZIndex(), widget);
     }
+  }
+
+  private int getMaxZIndex() {
+    OptionalInt maybeMax;
+    maybeMax = zIndexToWidget.keySet().stream().mapToInt(v -> v).max();
+    int max = maybeMax.orElse(-1);
+    if (max == Integer.MAX_VALUE) {
+      throw new IllegalStateException();
+    }
+    return max;
   }
 }
